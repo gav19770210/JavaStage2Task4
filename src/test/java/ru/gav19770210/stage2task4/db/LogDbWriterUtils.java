@@ -1,18 +1,13 @@
 package ru.gav19770210.stage2task4.db;
 
-import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import javax.persistence.NoResultException;
 
 public class LogDbWriterUtils {
-    SessionFactory sessionFactory;
-
-    public void clearLogDbData(AnnotationConfigApplicationContext applicationContext, String[] arrUsers) {
+    public void clearLogDbData(SessionFactory sessionFactory, String[] arrUsers) {
         System.out.println("Удаление данных в БД по списку логинов пользователей");
-
-        System.out.println("Получение объекта фабрики сессий БД");
-        sessionFactory = applicationContext.getBean(SessionFactory.class);
 
         System.out.println("Открытие сессии БД");
         Session session = sessionFactory.openSession();

@@ -3,7 +3,10 @@ package ru.gav19770210.stage2task4.file;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import ru.gav19770210.stage2task4.control.LogConfig;
 import ru.gav19770210.stage2task4.model.LogRow;
 import ru.gav19770210.stage2task4.model.LogRowItem;
 
@@ -17,34 +20,28 @@ import java.util.Map;
  * - Чтение набора тестовых файлов логов через компонент, и сохранение данных в другую мапированную коллекцию<br/>
  * - Сравнение полученных мапированных коллекций
  */
+@SpringBootTest(classes = {LogConfig.class})
 public class LogFilesReaderTest {
-    AnnotationConfigApplicationContext applicationContext;
+    @Autowired
     LogFilesReader logFilesReader;
+    @Autowired
     LogErrorWriter logErrorWriter;
-
-    Map<String, String> writeData;
-    Map<String, String> readData = new HashMap<>();
+    @Autowired
+    @Qualifier("logRowSeparator")
+    String logRowSeparator;
+    @Autowired
+    @Qualifier("dirLogSource")
+    String logDir;
 
     @Test
     @DisplayName("Тест компонента LogFilesReader - итератора по строкам файлов лога")
     public void test() throws IOException {
-        System.out.println("Создание контекста Spring");
-        Assertions.assertDoesNotThrow(() -> applicationContext = new AnnotationConfigApplicationContext("ru.gav19770210.stage2task4"),
-                "Не удалось создать контекст Spring");
-
         String[] arrUsers = {"Dog", "Cat", "Rat"};
-        writeData = (new LogFilesReaderUtils()).generateLogFiles(applicationContext, arrUsers, 3, 5);
-
-        System.out.println("Создание компонента LogFilesReader");
-        Assertions.assertDoesNotThrow(() -> logFilesReader = applicationContext.getBean(LogFilesReader.class),
-                "Не удалось создать компонент LogFilesReader");
-
-        System.out.println("Создание компонента LogErrorWriter");
-        Assertions.assertDoesNotThrow(() -> logErrorWriter = applicationContext.getBean(LogErrorWriter.class),
-                "Не удалось создать компонент LogErrorWriter");
+        Map<String, String> writeData = (new LogFilesReaderUtils()).generateLogFiles(logDir, logRowSeparator,
+                arrUsers, 3, 5);
 
         System.out.println("Чтение тестовых файлов логов");
-        readData.clear();
+        Map<String, String> readData = new HashMap<>();
         Assertions.assertDoesNotThrow(() -> {
             LogRow logRow;
             String logStrKey;
@@ -60,11 +57,16 @@ public class LogFilesReaderTest {
         }, "Не удалось прочитать данные тестовых файлов логов");
 
         System.out.println("Сравнение количества сгенерированных и прочитанных записей тестовых файлов логов");
+        System.out.println("writeData.size(): " + writeData.size());
+        System.out.println("readData.size(): " + readData.size());
         Assertions.assertEquals(writeData.size(), readData.size(),
                 "Количество сгенерированных записей не равно количеству прочитанных записей");
 
         System.out.println("Сравнение сгенерированных и прочитанных записей тестовых файлов логов");
         writeData.forEach((k, v) -> Assertions.assertEquals(v, readData.get(k),
                 "Прочитанная запись не соответствует сгенерированной"));
+
+        writeData.clear();
+        readData.clear();
     }
 }

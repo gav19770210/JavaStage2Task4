@@ -1,10 +1,10 @@
 package ru.gav19770210.stage2task4.db;
 
-import jakarta.persistence.*;
 import lombok.Getter;
 import ru.gav19770210.stage2task4.model.LogRow;
 import ru.gav19770210.stage2task4.model.LogRowItem;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

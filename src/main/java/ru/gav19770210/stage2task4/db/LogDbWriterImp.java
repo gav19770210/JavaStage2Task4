@@ -1,25 +1,18 @@
 package ru.gav19770210.stage2task4.db;
 
-import jakarta.persistence.NoResultException;
-import lombok.Getter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import ru.gav19770210.stage2task4.model.LogRow;
 import ru.gav19770210.stage2task4.model.LogRowItem;
 
-/**
- * <b>LogDbWriterImp</b> это компонент сохранения данных логов в БД.
- */
-@Component
+import javax.persistence.NoResultException;
+
 public class LogDbWriterImp implements LogDbWriter {
-    @Getter
-    @Autowired
-    private SessionFactory sessionFactory;
+    private final SessionFactory sessionFactory;
     private Session session;
 
-    public LogDbWriterImp() {
+    public LogDbWriterImp(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
     }
 
     @Override

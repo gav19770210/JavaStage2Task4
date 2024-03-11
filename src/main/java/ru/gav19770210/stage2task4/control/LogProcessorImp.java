@@ -1,7 +1,5 @@
 package ru.gav19770210.stage2task4.control;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import ru.gav19770210.stage2task4.check.LogCheckRules;
 import ru.gav19770210.stage2task4.db.LogDbWriter;
 import ru.gav19770210.stage2task4.file.LogErrorWriter;
@@ -15,16 +13,21 @@ import ru.gav19770210.stage2task4.model.LogRow;
  * - запись проверенных данных в БД<p>
  * - запись исключний обработки данных в файл ошибок
  */
-@Component
 public class LogProcessorImp implements LogProcessor {
-    @Autowired
-    private LogFilesReader logFilesReader;
-    @Autowired
-    private LogCheckRules logCheckRules;
-    @Autowired
-    private LogErrorWriter logErrorWriter;
-    @Autowired
-    private LogDbWriter logDbWriter;
+    private final LogFilesReader logFilesReader;
+    private final LogCheckRules logCheckRules;
+    private final LogErrorWriter logErrorWriter;
+    private final LogDbWriter logDbWriter;
+
+    public LogProcessorImp(LogFilesReader logFilesReader,
+                           LogCheckRules logCheckRules,
+                           LogErrorWriter logErrorWriter,
+                           LogDbWriter logDbWriter) {
+        this.logFilesReader = logFilesReader;
+        this.logCheckRules = logCheckRules;
+        this.logErrorWriter = logErrorWriter;
+        this.logDbWriter = logDbWriter;
+    }
 
     @Override
     public void uploadLogs() {

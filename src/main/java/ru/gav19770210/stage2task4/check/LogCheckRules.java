@@ -13,7 +13,7 @@ public interface LogCheckRules {
      * @param logRowItem элемент строки лога
      * @param rules      список правил проверки элемента строки лога
      */
-    void addRule(LogRowItem logRowItem, LogChecker... rules);
+    LogCheckRules addRule(LogRowItem logRowItem, LogChecker... rules);
 
     /**
      * <b>processRow</b> - метод применяет правила проверки к значениям элементов разобранной строки лога.

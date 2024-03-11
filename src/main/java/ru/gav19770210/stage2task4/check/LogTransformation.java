@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * <b>LogTransformation</b> это аннотация для компонентов, реализующих метод проверки данных лога.
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface LogTransformation {
     String value() default "";

@@ -3,13 +3,22 @@ package ru.gav19770210.stage2task4.check;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import ru.gav19770210.stage2task4.control.LogConfig;
 import ru.gav19770210.stage2task4.model.LogRow;
 import ru.gav19770210.stage2task4.model.LogRowItem;
+import ru.gav19770210.stage2task4.model.LogRowParser;
 
+@SpringBootTest(classes = {LogConfig.class})
 public class LogCheckRulesTest {
-    AnnotationConfigApplicationContext applicationContext;
+    @Autowired
     LogCheckRules logCheckRules;
+    @Autowired
+    LogRowParser logRowParser;
+    @Autowired
+    @Qualifier("logRowSeparator")
     String logRowSeparator;
     LogRow logRow;
     String logStr;
@@ -17,25 +26,12 @@ public class LogCheckRulesTest {
     @Test
     @DisplayName("Тест компонента LogCheckRules - применения правил проверки")
     public void Test() {
-        System.out.println("Создание контекста Spring");
-        Assertions.assertDoesNotThrow(() -> applicationContext = new AnnotationConfigApplicationContext("ru.gav19770210.stage2task4"),
-                "Не удалось создать контекст Spring");
-
-        System.out.println("Создание компонента LogProcessRules");
-        Assertions.assertDoesNotThrow(() -> logCheckRules = applicationContext.getBean(LogCheckRules.class),
-                "Не удалось создать компонент LogProcessRules");
-
-        System.out.println("Создание компонента logRowSeparator");
-        Assertions.assertDoesNotThrow(() -> logRowSeparator = applicationContext.getBean("logRowSeparator", String.class),
-                "Не удалось создать компонент logRowSeparator");
-        System.out.println("logRowSeparator: " + logRowSeparator);
-
         logStr = "LoginIII" + logRowSeparator + "iVanov" + logRowSeparator + "ivaN" + logRowSeparator + "ivanOvich"
                 + logRowSeparator + "2024-01-02 03:04:05" + logRowSeparator + "far";
         System.out.println("Тестовая строка: " + logStr);
 
         System.out.println("Создание экземпляра класса LogRow");
-        Assertions.assertDoesNotThrow(() -> logRow = new LogRow(logStr, "test_log.txt"),
+        Assertions.assertDoesNotThrow(() -> logRow = new LogRow(logStr, "test_log.txt", logRowParser.parseLogRow(logStr)),
                 "Не удалось создать экземпляр класса LogRow");
 
         System.out.println("Применение правил проверки к экземпляру класса LogRow");

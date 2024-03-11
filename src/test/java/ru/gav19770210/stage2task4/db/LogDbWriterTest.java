@@ -6,8 +6,12 @@ import org.hibernate.query.Query;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import ru.gav19770210.stage2task4.control.LogConfig;
 import ru.gav19770210.stage2task4.model.LogRow;
+import ru.gav19770210.stage2task4.model.LogRowParser;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -18,12 +22,18 @@ import java.util.List;
  * - Чтение данных экземпляра класса LogRow, ранее записанных в БД<br/>
  * - Проверка результатов записи/чтения данных БД
  */
+@SpringBootTest(classes = {LogConfig.class})
 public class LogDbWriterTest {
-    AnnotationConfigApplicationContext applicationContext;
+    @Autowired
     LogDbWriter logDbWriter;
+    @Autowired
+    LogRowParser logRowParser;
+    @Autowired
+    @Qualifier("logRowSeparator")
     String logRowSeparator;
     LogRow logRow;
     String logStr;
+    @Autowired
     SessionFactory sessionFactory;
     UserDb userDb;
     List<LoginDb> logins;
@@ -31,30 +41,17 @@ public class LogDbWriterTest {
     @Test
     @DisplayName("Тест компонента LogDbWriter - запись данных в БД")
     public void test() {
-        System.out.println("Создание контекста Spring");
-        Assertions.assertDoesNotThrow(() -> applicationContext = new AnnotationConfigApplicationContext("ru.gav19770210.stage2task4"),
-                "Не удалось создать контекст Spring");
-
-        System.out.println("Создание компонента logRowSeparator");
-        Assertions.assertDoesNotThrow(() -> logRowSeparator = applicationContext.getBean("logRowSeparator", String.class),
-                "Не удалось создать компонент logRowSeparator");
-        System.out.println("logRowSeparator: " + logRowSeparator);
-
         String userName = "LoginX";
         String[] arrUsers = {userName};
-        (new LogDbWriterUtils()).clearLogDbData(applicationContext, arrUsers);
+        (new LogDbWriterUtils()).clearLogDbData(sessionFactory, arrUsers);
 
         logStr = userName + logRowSeparator + "iVanov" + logRowSeparator + "ivaN" + logRowSeparator + "ivanOvich"
                 + logRowSeparator + "2024-01-02 03:04:05" + logRowSeparator + "far";
         System.out.println("Тестовая строка: " + logStr);
 
         System.out.println("Создание экземпляра класса LogRow");
-        Assertions.assertDoesNotThrow(() -> logRow = new LogRow(logStr, "test_log.txt"),
+        Assertions.assertDoesNotThrow(() -> logRow = new LogRow(logStr, "test_log.txt", logRowParser.parseLogRow(logStr)),
                 "Не удалось создать экземпляр класса LogRow");
-
-        System.out.println("Создание компонента LogDbWriter");
-        Assertions.assertDoesNotThrow(() -> logDbWriter = applicationContext.getBean(LogDbWriter.class),
-                "Не удалось создать компонент LogDbWriter");
 
         System.out.println("Открытие сессии БД");
         Assertions.assertDoesNotThrow(() -> logDbWriter.openSession(),
@@ -68,9 +65,6 @@ public class LogDbWriterTest {
         Assertions.assertDoesNotThrow(() -> logDbWriter.closeSession(),
                 "Не удалось закрыть сессию БД");
 
-        System.out.println("Получение объекта фабрики сессий БД");
-        sessionFactory = applicationContext.getBean(SessionFactory.class);
-
         System.out.println("Открытие сессии БД");
         Session session = sessionFactory.openSession();
 
@@ -79,7 +73,7 @@ public class LogDbWriterTest {
 
         System.out.println("Поиск пользователя <LoginX> в БД");
         Assertions.assertDoesNotThrow(() -> userDb = session.createQuery("from UserDb where userName = 'LoginX'", UserDb.class)
-                        .getSingleResult(), "В БД не найден пользователь <LoginX>");
+                .getSingleResult(), "В БД не найден пользователь <LoginX>");
 
         System.out.println("Сравнение значения поля <fio>");
         Assertions.assertEquals("iVanov ivaN ivanOvich", userDb.getFio(),
